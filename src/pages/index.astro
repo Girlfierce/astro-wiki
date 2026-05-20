@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Gallery from '../components/Landing/Gallery.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+---
+
+<BaseLayout title="Astro Wiki - Semantic Knowledge Architecture">
+  <main class="min-h-screen">
+    <Gallery posts={posts} />
+  </main>
+</BaseLayout>
+
+<style>
+  main {
+    position: relative;
+  }
+</style>

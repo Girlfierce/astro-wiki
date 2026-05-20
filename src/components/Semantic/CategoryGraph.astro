@@ -1,0 +1,131 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { posts } = Astro.props as Props;
+
+// Aggregate categories and tags
+const categoryMap = new Map<string, number>();
+const museMap = new Map<string, number>();
+const tagMap = new Map<string, number>();
+
+posts.forEach((post) => {
+  post.data.categories.forEach((cat) => {
+    categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1);
+  });
+  
+  if (post.data.muse) {
+    museMap.set(post.data.muse, (museMap.get(post.data.muse) || 0) + 1);
+  }
+  
+  post.data.tags.forEach((tag) => {
+    tagMap.set(tag, (tagMap.get(tag) || 0) + 1);
+  });
+});
+
+const museColors: Record<string, string> = {
+  euterpe: '#3b82f6',
+  thalia: '#f59e0b',
+  erato: '#ec4899',
+  polymnia: '#8b5cf6',
+  melpomene: '#ef4444',
+  urania: '#06b6d4',
+  clio: '#10b981',
+  calliope: '#f97316',
+  terpsichore: '#a855f7',
+  void: '#6b7280',
+};
+---
+
+<div class="semantic-graph py-16 px-6 bg-gray-900/50">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-4xl font-bold text-white mb-12 text-center">Semantic Knowledge Graph</h2>
+    
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Muse Distribution -->
+      <div class="bg-gray-800/50 rounded-xl p-6">
+        <h3 class="text-2xl font-bold text-white mb-6">Muse Distribution</h3>
+        <div class="space-y-4">
+          {Array.from(museMap.entries()).map(([muse, count]) => (
+            <div class="flex items-center gap-4">
+              <div 
+                class="w-4 h-4 rounded-full" 
+                style={`background-color: ${museColors[muse] || '#6b7280'}`}
+              ></div>
+              <span class="text-gray-300 flex-1 capitalize">{muse}</span>
+              <span class="text-gray-500">{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="bg-gray-800/50 rounded-xl p-6">
+        <h3 class="text-2xl font-bold text-white mb-6">Categories</h3>
+        <div class="flex flex-wrap gap-2">
+          {Array.from(categoryMap.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map(([cat, count]) => (
+              <span 
+                class="px-4 py-2 bg-gray-700/50 text-gray-300 rounded-lg hover:bg-purple-900/50 hover:text-purple-300 transition-colors cursor-pointer"
+                style={`font-size: ${Math.min(1 + count * 0.2, 1.5)}rem`}
+              >
+                {cat}
+              </span>
+            ))}
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="bg-gray-800/50 rounded-xl p-6">
+        <h3 class="text-2xl font-bold text-white mb-6">Tags</h3>
+        <div class="flex flex-wrap gap-2">
+          {Array.from(tagMap.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 20)
+            .map(([tag, count]) => (
+              <span 
+                class="px-3 py-1 bg-gray-700/50 text-gray-400 rounded hover:bg-blue-900/50 hover:text-blue-300 transition-colors cursor-pointer text-sm"
+              >
+                #{tag}
+              </span>
+            ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- PARA Type Distribution -->
+    <div class="mt-12 bg-gray-800/50 rounded-xl p-6">
+      <h3 class="text-2xl font-bold text-white mb-6">PARA Type Distribution</h3>
+      <div class="grid grid-cols-3 gap-6">
+        {['project', 'area', 'resource'].map((type) => {
+          const count = posts.filter((p) => p.data.paraType === type).length;
+          const percentage = posts.length > 0 ? (count / posts.length) * 100 : 0;
+          
+          return (
+            <div class="text-center">
+              <div class="text-4xl font-bold text-white mb-2">{count}</div>
+              <div class="text-gray-400 capitalize">{type}s</div>
+              <div class="mt-2 bg-gray-700 rounded-full h-2">
+                <div 
+                  class="bg-purple-500 h-2 rounded-full transition-all duration-500"
+                  style={`width: ${percentage}%`}
+                ></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .semantic-graph {
+    border-top: 1px solid rgba(139, 92, 246, 0.2);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  }
+</style>

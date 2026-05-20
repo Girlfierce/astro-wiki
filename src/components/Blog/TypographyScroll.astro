@@ -1,0 +1,218 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props as Props;
+---
+
+<div class="typography-container">
+  <div class="post-header py-20 px-6 bg-gradient-to-b from-purple-900/20 to-transparent">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="px-4 py-2 bg-purple-900/50 text-purple-300 text-sm rounded-full uppercase tracking-wide">
+          {post.data.muse}
+        </span>
+        <span class="px-4 py-2 bg-blue-900/50 text-blue-300 text-sm rounded-full uppercase tracking-wide">
+          {post.data.paraType}
+        </span>
+        {post.data.categories.map((cat) => (
+          <span class="px-4 py-2 bg-gray-800/50 text-gray-300 text-sm rounded-full">
+            {cat}
+          </span>
+        ))}
+      </div>
+      
+      <h1 class="typography-title text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+        {post.data.title}
+      </h1>
+      
+      <p class="typography-subtitle text-xl md:text-2xl text-gray-400 max-w-3xl">
+        {post.data.description}
+      </p>
+      
+      <div class="mt-8 flex items-center gap-6 text-sm text-gray-500">
+        <span>{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+        <span>•</span>
+        <span>{post.data.readingTime} min read</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="post-content">
+    <slot />
+  </div>
+
+  <div class="post-footer py-16 px-6 border-t border-gray-800">
+    <div class="max-w-4xl mx-auto">
+      <h3 class="text-2xl font-bold text-white mb-6">Tags</h3>
+      <div class="flex flex-wrap gap-3">
+        {post.data.tags.map((tag) => (
+          <span class="px-4 py-2 bg-gray-900 text-gray-400 rounded-lg hover:bg-purple-900/50 hover:text-purple-300 transition-colors cursor-pointer">
+            #{tag}
+          </span>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Title animation
+  gsap.from('.typography-title', {
+    scrollTrigger: {
+      trigger: '.post-header',
+      start: 'top 80%',
+    },
+    y: 80,
+    opacity: 0,
+    duration: 1.2,
+    ease: 'power3.out',
+  });
+
+  gsap.from('.typography-subtitle', {
+    scrollTrigger: {
+      trigger: '.post-header',
+      start: 'top 70%',
+    },
+    y: 60,
+    opacity: 0,
+    duration: 1,
+    ease: 'power3.out',
+    delay: 0.3,
+  });
+
+  // Animate headings in content
+  const headings = document.querySelectorAll('.post-content h1, .post-content h2, .post-content h3');
+  
+  headings.forEach((heading) => {
+    gsap.from(heading, {
+      scrollTrigger: {
+        trigger: heading,
+        start: 'top 85%',
+        toggleActions: 'play none none reverse',
+      },
+      x: -50,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power3.out',
+    });
+  });
+
+  // Animate paragraphs
+  const paragraphs = document.querySelectorAll('.post-content p');
+  
+  paragraphs.forEach((p, i) => {
+    gsap.from(p, {
+      scrollTrigger: {
+        trigger: p,
+        start: 'top 90%',
+        toggleActions: 'play none none reverse',
+      },
+      y: 30,
+      opacity: 0,
+      duration: 0.6,
+      ease: 'power3.out',
+      delay: i % 3 * 0.1,
+    });
+  });
+
+  // Animate code blocks
+  const codeBlocks = document.querySelectorAll('.post-content pre');
+  
+  codeBlocks.forEach((code) => {
+    gsap.from(code, {
+      scrollTrigger: {
+        trigger: code,
+        start: 'top 85%',
+        toggleActions: 'play none none reverse',
+      },
+      scale: 0.95,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power3.out',
+    });
+  });
+
+  // Animate lists
+  const lists = document.querySelectorAll('.post-content ul, .post-content ol');
+  
+  lists.forEach((list) => {
+    const items = list.querySelectorAll('li');
+    
+    gsap.from(items, {
+      scrollTrigger: {
+        trigger: list,
+        start: 'top 85%',
+        toggleActions: 'play none none reverse',
+      },
+      x: -30,
+      opacity: 0,
+      duration: 0.5,
+      stagger: 0.1,
+      ease: 'power3.out',
+    });
+  });
+
+  // Animate tables
+  const tables = document.querySelectorAll('.post-content table');
+  
+  tables.forEach((table) => {
+    gsap.from(table, {
+      scrollTrigger: {
+        trigger: table,
+        start: 'top 85%',
+        toggleActions: 'play none none reverse',
+      },
+      y: 40,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power3.out',
+    });
+  });
+</script>
+
+<style>
+  .typography-container {
+    position: relative;
+  }
+  
+  .post-content p,
+  .post-content li {
+    font-size: 1.125rem;
+    line-height: 1.8;
+  }
+  
+  .post-content h1 {
+    font-size: 2.5rem;
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .post-content h2 {
+    font-size: 2rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .post-content h3 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .post-content blockquote {
+    border-left: 4px solid #8b5cf6;
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    font-style: italic;
+    color: #a78bfa;
+  }
+</style>
